@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piraeus Real Estate Market Tracker</title>
+    <script src="vendor/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ Piraeus Real Estate Market Tracker</h1>
+            <p>Live snapshot of the Piraeus property market &mdash; prices, areas and trends</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Market Dashboard</button>
+            <button class="tab-btn" data-tab="listings">🏠 Listings Explorer</button>
+        </nav>
+
+        <!-- ============ DASHBOARD ============ -->
+        <section id="dashboard" class="tab-panel active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Listings</div>
+                    <div class="kpi-value" id="kpiTotal">—</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Median Price</div>
+                    <div class="kpi-value" id="kpiMedianPrice">—</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Median €/m²</div>
+                    <div class="kpi-value" id="kpiMedianPpsm">—</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Median Area</div>
+                    <div class="kpi-value" id="kpiMedianArea">—</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Price Range</div>
+                    <div class="kpi-value small" id="kpiPriceRange">—</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">With Parking</div>
+                    <div class="kpi-value" id="kpiParking">—</div>
+                </div>
+            </div>
+
+            <div class="dash-filter">
+                <label for="dashType">Filter market by type:</label>
+                <select id="dashType"><option value="">All property types</option></select>
+                <span class="dash-filter-note" id="dashScope"></span>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card wide">
+                    <h3>Price distribution</h3>
+                    <canvas id="chartPriceDist"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Listings by property type</h3>
+                    <canvas id="chartType"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Median €/m² by property type</h3>
+                    <canvas id="chartPpsmType"></canvas>
+                </div>
+                <div class="chart-card wide">
+                    <h3>Price vs. area (€/m² insight)</h3>
+                    <canvas id="chartScatter"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Listings by size band</h3>
+                    <canvas id="chartSizeBand"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Bedroom mix</h3>
+                    <canvas id="chartBeds"></canvas>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <h3>Market breakdown by property type</h3>
+                <div class="table-wrap">
+                    <table id="typeTable">
+                        <thead>
+                            <tr>
+                                <th>Type</th><th>Listings</th><th>Median price</th>
+                                <th>Median €/m²</th><th>Median area</th><th>Cheapest</th><th>Priciest</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ LISTINGS ============ -->
+        <section id="listings" class="tab-panel">
+            <div class="controls">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="searchInput">Search by type</label>
+                        <input type="text" id="searchInput" placeholder="e.g. Apartment, Maisonette, Διαμέρισμα…">
+                    </div>
+                    <div class="control-group">
+                        <label for="minPrice">Min Price (€)</label>
+                        <input type="number" id="minPrice" placeholder="0" min="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="maxPrice">Max Price (€)</label>
+                        <input type="number" id="maxPrice" placeholder="No max" min="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="minSqm">Min Area (m²)</label>
+                        <input type="number" id="minSqm" placeholder="0" min="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="maxSqm">Max Area (m²)</label>
+                        <input type="number" id="maxSqm" placeholder="No max" min="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="bedrooms">Bedrooms</label>
+                        <select id="bedrooms">
+                            <option value="">Any</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="bathrooms">Bathrooms</label>
+                        <select id="bathrooms">
+                            <option value="">Any</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3+</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="parking">Parking</label>
+                        <select id="parking">
+                            <option value="">Any</option>
+                            <option value="Yes">Has Parking</option>
+                            <option value="No">No Parking</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="controls-footer">
+                    <div class="sort-controls">
+                        <label for="sortBy">Sort by:</label>
+                        <select id="sortBy">
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="sqm-asc">Area: Small to Large</option>
+                            <option value="sqm-desc">Area: Large to Small</option>
+                            <option value="ppsm-asc">€/m²: Low to High</option>
+                            <option value="ppsm-desc">€/m²: High to Low</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-search" id="btnSearch">🔍 Apply</button>
+                        <button class="btn-reset" id="btnReset">↺ Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item"><span class="stat-label">Showing:</span><span class="stat-value" id="showingCount">0</span></div>
+                <div class="stat-item"><span class="stat-label">Avg Price:</span><span class="stat-value" id="avgPrice">€0</span></div>
+                <div class="stat-item"><span class="stat-label">Median €/m²:</span><span class="stat-value" id="medPpsm">€0</span></div>
+                <div class="stat-item"><span class="stat-label">Avg Area:</span><span class="stat-value" id="avgArea">0 m²</span></div>
+            </div>
+
+            <div id="listingsContainer" class="listings-container"></div>
+        </section>
+
+        <footer class="site-footer">
+            <p>Data source: spitogatos.gr &middot; Snapshot dataset of <span id="footerCount">—</span> listings &middot; For market-tracking purposes</p>
+        </footer>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
